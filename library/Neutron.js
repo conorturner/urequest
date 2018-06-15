@@ -1,9 +1,11 @@
 const zlib = require("zlib");
 const Stream = require("stream");
 
+const parseInput = Symbol();
+
 class Neutron {
 
-	static compress(data, acceptEncoding) {
+	static [parseInput](data){
 		let stream;
 		if (typeof data === "string") {
 			stream = new Stream.PassThrough();
@@ -15,6 +17,12 @@ class Neutron {
 		}
 		else if (data && data.pipe) stream = data;
 		else throw new Error("data must be string, stream or buffer");
+
+		return stream;
+	}
+
+	static compress(data, acceptEncoding) {
+		const stream = this[parseInput](data);
 
 		if (acceptEncoding.match(/\bdeflate\b/)) return stream.pipe(zlib.createDeflate());
 		else if (acceptEncoding.match(/\bgzip\b/)) return stream.pipe(zlib.createGzip());
