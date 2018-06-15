@@ -29,12 +29,7 @@ describe("URequest", () => {
 
 	it("get json", (done) => {
 		const u = new URequest();
-
-		const options = {
-			uri: "http://localhost:8123/posts",
-			json: true,
-			qs: { page: 0 }
-		};
+		const options = { uri: "http://localhost:8123/posts", json: true, qs: { page: 0 } };
 
 		u.request(options)
 			.then(result => {
@@ -108,11 +103,7 @@ describe("URequest", () => {
 
 	it("get json https", (done) => {
 		const u = new URequest();
-
-		const options = {
-			uri: "https://jsonplaceholder.typicode.com/posts",
-			json: true
-		};
+		const options = { uri: "https://jsonplaceholder.typicode.com/posts", json: true };
 
 		u.request(options)
 			.then(result => {
