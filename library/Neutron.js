@@ -5,7 +5,7 @@ const parseInput = Symbol();
 
 class Neutron {
 
-	static [parseInput](data){
+	static [parseInput](data) {
 		let stream;
 		if (typeof data === "string") {
 			stream = new Stream.PassThrough();
@@ -21,17 +21,33 @@ class Neutron {
 		return stream;
 	}
 
-	static compress(data, acceptEncoding) {
+	static compress(data, encoding) {
 		const stream = this[parseInput](data);
 
-		if (acceptEncoding.match(/\bdeflate\b/)) return stream.pipe(zlib.createDeflate());
-		else if (acceptEncoding.match(/\bgzip\b/)) return stream.pipe(zlib.createGzip());
+		if (encoding.match(/\bdeflate\b/)) return stream.pipe(zlib.createDeflate());
+		else if (encoding.match(/\bgzip\b/)) return stream.pipe(zlib.createGzip());
 		else return stream;
 	}
 
-	static decompress(stream, contentEncoding) {
-		if (contentEncoding === "gzip" || contentEncoding === "deflate") return stream.pipe(zlib.createUnzip());
+	static decompress(data, encoding) {
+		const stream = this[parseInput](data);
+
+		if (encoding === "gzip" || encoding === "deflate") return stream.pipe(zlib.createUnzip());
 		return stream;
+	}
+
+	static flattenStream(stream) {
+		return new Promise((resolve, reject) => {
+			try {
+				let buffer = Buffer.from([]);
+				stream.on("data", (chunk) => buffer = Buffer.concat([buffer,chunk ]));
+				stream.on("error", reject);
+				stream.on("end", () => resolve(buffer.toString()));
+			}
+			catch (e) {
+				reject(e);
+			}
+		});
 	}
 }
 

@@ -2,18 +2,6 @@ const { expect } = require("chai");
 const Stream = require("stream");
 const { Neutron } = require("../");
 
-const streamToPromise = (stream) => new Promise((resolve, reject) => {
-	try {
-		const chunks = [];
-		stream.on("data", (d) => chunks.push(d));
-		stream.on("error", reject);
-		stream.on("end", () => resolve(Buffer.concat(chunks).toString()));
-	}
-	catch (e) {
-		reject(e);
-	}
-});
-
 describe("Neutron", () => {
 
 	describe("compress and decompress", () => {
@@ -28,7 +16,7 @@ describe("Neutron", () => {
 					const compressedStream = Neutron.compress(stream, encoding);
 					const decompressedStream = Neutron.decompress(compressedStream, encoding);
 
-					streamToPromise(decompressedStream)
+					Neutron.flattenStream(decompressedStream)
 						.then(output => {
 							expect(output).to.equal(inputString);
 							done();
@@ -42,7 +30,7 @@ describe("Neutron", () => {
 					const compressedStream = Neutron.compress(inputString, encoding);
 					const decompressedStream = Neutron.decompress(compressedStream, encoding);
 
-					streamToPromise(decompressedStream)
+					Neutron.flattenStream(decompressedStream)
 						.then(output => {
 							expect(output).to.equal(inputString);
 							done();
@@ -58,7 +46,7 @@ describe("Neutron", () => {
 					const compressedStream = Neutron.compress(buffer, encoding);
 					const decompressedStream = Neutron.decompress(compressedStream, encoding);
 
-					streamToPromise(decompressedStream)
+					Neutron.flattenStream(decompressedStream)
 						.then(output => {
 							expect(output).to.equal(inputString);
 							done();
