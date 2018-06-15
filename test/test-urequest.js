@@ -1,23 +1,12 @@
 const TestServer = require("./assets/TestServer");
 const { expect } = require("chai");
-
 const { URequest } = require("../");
-
-// const http = require("http");
-// const querystring = require("querystring");
 
 describe("URequest", () => {
 
 	let httpServer;
-	before(done => {
-		httpServer = TestServer.native().listen(8123);
-		done();
-	});
-
-	after(done => {
-		httpServer.close();
-		done();
-	});
+	before(done => httpServer = TestServer.native().listen(8123, done));
+	after(done => httpServer.close(done));
 
 	it("constructor", (done) => {
 		const u = new URequest();
@@ -26,6 +15,19 @@ describe("URequest", () => {
 	});
 
 	it("basic get", (done) => {
+		const u = new URequest();
+		const options = { uri: "http://localhost:8123" };
+
+		u.request(options)
+			.then(result => {
+				expect(result).to.equal(undefined);
+				done();
+			})
+			.catch(done);
+
+	});
+
+	it("get json", (done) => {
 		const u = new URequest();
 
 		const options = {
@@ -104,7 +106,24 @@ describe("URequest", () => {
 
 	});
 
-	it("basic post", (done) => {
+	it("get json https", (done) => {
+		const u = new URequest();
+
+		const options = {
+			uri: "https://jsonplaceholder.typicode.com/posts",
+			json: true
+		};
+
+		u.request(options)
+			.then(result => {
+				expect(result).to.be.an("array");
+				done();
+			})
+			.catch(done);
+
+	});
+
+	it("post json", (done) => {
 		const u = new URequest();
 
 		const body = {

@@ -5,16 +5,9 @@ const pageArray = (arr, page, pageSize = 10) => arr.slice(page * pageSize, (page
 const app = new Rest();
 app.pre(JsonBodyParser.middleware());
 
-app.get("/posts", (req, res) => {
-	const { query: { page } } = req;
-	const posts = require("./json/posts");
-	res.send(pageArray(posts, page));
-});
-app.get("/comments", (req, res) => {
-	const { query: { page } } = req;
-	const posts = require("./json/comments");
-	res.send(pageArray(posts, page));
-});
+app.get("/", (req, res) => res.send(200));
+app.get("/posts", (req, res) => res.send(pageArray(require("./json/posts"), req.query.page)));
+app.get("/comments", (req, res) => res.send(pageArray(require("./json/comments"), req.query.page)));
 
 app.get("/error", (req, res, next) => next(new UInternalServerError(":(")));
 app.post("/echo", (req, res) => res.send(req.body));

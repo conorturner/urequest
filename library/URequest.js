@@ -1,8 +1,12 @@
 const http = require("http");
+const https = require("https");
 const { URL, URLSearchParams } = require("url");
 
 const execute = Symbol();
 const parseOptions = Symbol();
+const parseRequestBody = Symbol();
+const parseResponse = Symbol();
+const getHttpClient = Symbol();
 
 class URequest {
 
@@ -14,28 +18,21 @@ class URequest {
 		return this[execute](options);
 	}
 
+	[getHttpClient](protocol) {
+		return protocol === "http:" ? http : https;
+	}
+
 	[execute](options) {
-		const { json, httpOptions, body } = this[parseOptions](options);
+		const { httpOptions, parsedBody } = this[parseOptions](options);
 
-		return new Promise((resolve, reject) => {
-			const req = http.request(httpOptions, res => {
-				// const { headers, statusCode } = res;
-
-				let buffer = Buffer.from([]);
-				res.on("data", (chunk) => buffer = Buffer.concat([buffer, Buffer.from(chunk)]));
-				res.on("end", () => resolve(json ? JSON.parse(buffer.toString()) : buffer.toString()));
-			});
-
-			req.on("error", reject);
-
-			if (body) req.end(body);
-			else req.end();
-		});
+		return new Promise((resolve, reject) =>
+			(this[getHttpClient](httpOptions.protocol)).request(httpOptions, resolve).on("error", reject).end(parsedBody))
+			.then(res => this[parseResponse]({ res, options }));
 	}
 
 	[parseOptions](options) {
-		const { uri, port, path, method = "GET", headers, body, json, qs } = options;
-		const url = URL.constructor ? new URL(uri) : URL(uri);
+		const { uri, port, path, method = "GET", headers = {}, body, qs } = options;
+		const url = new URL(uri);
 		if (qs) url.search = new URLSearchParams(qs);
 
 		const httpOptions = {
@@ -43,23 +40,46 @@ class URequest {
 			host: url.host,
 			origin: url.origin,
 			hostname: url.hostname,
-			method,
+			method: method.toUpperCase(),
 			port: port || url.port,
 			path: url.pathname + url.search || path + url.search,
 			headers
 		};
 
-		let postData;
+		const { parsedBody, contentHeaders } = this[parseRequestBody](body);
+		Object.assign(httpOptions.headers, contentHeaders);
+
+		return { httpOptions, parsedBody };
+	}
+
+	[parseRequestBody](body) {
+		let parsedBody, contentHeaders = {};
 		if (body) {
-			postData = Buffer.from(JSON.stringify(body));
-			Object.assign(httpOptions.headers || {}, {
+			parsedBody = Buffer.from(JSON.stringify(body));
+			contentHeaders = {
 				"Content-Type": "application/json",
-				"Content-Length": Buffer.byteLength(postData)
-			});
+				"Content-Length": Buffer.byteLength(parsedBody)
+			};
 		}
 
-		return { httpOptions, json, body: postData };
+		return { parsedBody, contentHeaders };
 	}
+
+	[parseResponse]({ res, options }) {
+		const { json } = options;
+		// const { headers, statusCode } = res;
+
+		let buffer = Buffer.from([]);
+		res.on("data", (chunk) => buffer = Buffer.concat([buffer, Buffer.from(chunk)]));
+
+		return new Promise(resolve =>
+			res.on("end", () => {
+				const string = buffer.toString();
+				if (string.length === 0) resolve();
+				else resolve(json ? JSON.parse(string) : string);
+			}));
+	}
+
 }
 
 module.exports = URequest;
