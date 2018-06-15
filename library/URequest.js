@@ -35,7 +35,7 @@ class URequest {
 
 	[parseOptions](options) {
 		const { uri, port, path, method = "GET", headers, body, json, qs } = options;
-		const url = url.constructor ? new URL(uri) : URL(uri);
+		const url = URL.constructor ? new URL(uri) : URL(uri);
 		if (qs) url.search = new URLSearchParams(qs);
 
 		const httpOptions = {
