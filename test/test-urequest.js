@@ -29,13 +29,14 @@ describe("URequest", () => {
 
 	it("get error", (done) => {
 		const u = new URequest();
-		const options = { uri: "http://localhost:8123/error",json: true };
+		const options = { uri: "http://localhost:8123/error", json: true };
 
 		u.request(options)
 			.then(done)
-			.catch(result => {
-				expect(result.code).to.equal("InternalServer");
-				expect(result.eid).to.be.a("string");
+			.catch(({ body, statusCode }) => {
+				expect(statusCode).to.equal(500);
+				expect(body.code).to.equal("InternalServer");
+				expect(body.eid).to.be.a("string");
 				done();
 			})
 			.catch(done);

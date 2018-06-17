@@ -96,10 +96,11 @@ class URequest {
 
 		return new Promise((resolve, reject) =>
 			res.on("end", () => {
-				const callback = statusCode > 399 ? reject : resolve;
+				const isError = statusCode > 399;
+				const callback = isError ? reject : resolve;
 
 				const string = buffer.toString();
-				if (resolveFull) callback({ headers, statusCode, body: json ? JSON.parse(string) : string });
+				if (isError || resolveFull) callback({ headers, statusCode, body: json ? JSON.parse(string) : string });
 				else if (string.length === 0) resolve();
 				else callback(json ? JSON.parse(string) : string);
 			}));
