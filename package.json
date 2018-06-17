@@ -1,6 +1,6 @@
 {
   "name": "urequest",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "zero dependency http request wrapper",
   "main": "index.js",
   "scripts": {
