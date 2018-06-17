@@ -43,6 +43,20 @@ describe("URequest", () => {
 
 	});
 
+	it("get error status only", (done) => {
+		const u = new URequest();
+		const options = { uri: "http://localhost:8123/error-status", json: true };
+
+		u.request(options)
+			.then(done)
+			.catch(({ body, statusCode }) => {
+				expect(statusCode).to.equal(500);
+				done();
+			})
+			.catch(done);
+
+	});
+
 	it("get json", (done) => {
 		const u = new URequest();
 		const options = { uri: "http://localhost:8123/posts", json: true, qs: { page: 0 } };

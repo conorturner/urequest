@@ -10,6 +10,7 @@ app.get("/posts", (req, res) => res.send(pageArray(require("./json/posts"), req.
 app.get("/comments", (req, res) => res.send(pageArray(require("./json/comments"), req.query.page)));
 
 app.get("/error", (req, res, next) => next(new UInternalServerError(":(")));
+app.get("/error-status", (req, res, next) => res.send(500));
 app.post("/echo", (req, res) => res.send(req.body));
 
 module.exports = app;
