@@ -27,6 +27,21 @@ describe("URequest", () => {
 
 	});
 
+	it("get error", (done) => {
+		const u = new URequest();
+		const options = { uri: "http://localhost:8123/error",json: true };
+
+		u.request(options)
+			.then(done)
+			.catch(result => {
+				expect(result.code).to.equal("InternalServer");
+				expect(result.eid).to.be.a("string");
+				done();
+			})
+			.catch(done);
+
+	});
+
 	it("get json", (done) => {
 		const u = new URequest();
 		const options = { uri: "http://localhost:8123/posts", json: true, qs: { page: 0 } };

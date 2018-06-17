@@ -65,7 +65,10 @@ class URequest {
 
 		let contentHeaders = {};
 		if (json) contentHeaders = Object.assign(contentHeaders, { "Content-Type": "application/json" });
-		if (gzip) contentHeaders = Object.assign(contentHeaders, { "Content-Encoding": "gzip", "Accept-Encoding": "gzip" });
+		if (gzip) contentHeaders = Object.assign(contentHeaders, {
+			"Content-Encoding": "gzip",
+			"Accept-Encoding": "gzip"
+		});
 
 		return contentHeaders;
 	}
@@ -85,17 +88,20 @@ class URequest {
 	}
 
 	[parseResponse]({ res, options }) {
-		const { json } = options;
-		// const { headers, statusCode } = res;
+		const { json, resolveFull } = options;
+		const { headers, statusCode } = res;
 
 		let buffer = Buffer.from([]);
 		res.on("data", (chunk) => buffer = Buffer.concat([buffer, Buffer.from(chunk)]));
 
-		return new Promise(resolve =>
+		return new Promise((resolve, reject) =>
 			res.on("end", () => {
+				const callback = statusCode > 399 ? reject : resolve;
+
 				const string = buffer.toString();
-				if (string.length === 0) resolve();
-				else resolve(json ? JSON.parse(string) : string);
+				if (resolveFull) callback({ headers, statusCode, body: json ? JSON.parse(string) : string });
+				else if (string.length === 0) resolve();
+				else callback(json ? JSON.parse(string) : string);
 			}));
 	}
 
