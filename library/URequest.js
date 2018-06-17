@@ -1,12 +1,14 @@
 const http = require("http");
 const https = require("https");
 const { URL, URLSearchParams } = require("url");
+const Neutron = require("./Neutron");
 
 const execute = Symbol();
 const parseOptions = Symbol();
 const parseRequestBody = Symbol();
 const parseResponse = Symbol();
 const getHttpClient = Symbol();
+const getContentHeaders = Symbol();
 
 class URequest {
 
@@ -23,11 +25,16 @@ class URequest {
 	}
 
 	[execute](options) {
-		const { httpOptions, parsedBody } = this[parseOptions](options);
+		const { httpOptions, stream } = this[parseOptions](options);
 
-		return new Promise((resolve, reject) =>
-			(this[getHttpClient](httpOptions.protocol)).request(httpOptions, resolve).on("error", reject).end(parsedBody))
-			.then(res => this[parseResponse]({ res, options }));
+		const promise = new Promise((resolve, reject) => {
+			const request = this[getHttpClient](httpOptions.protocol).request(httpOptions, resolve);
+			request.on("error", reject);
+			if (stream) stream.pipe(request);
+			else request.end();
+		});
+
+		return promise.then(res => this[parseResponse]({ res, options }));
 	}
 
 	[parseOptions](options) {
@@ -46,23 +53,35 @@ class URequest {
 			headers
 		};
 
-		const { parsedBody, contentHeaders } = this[parseRequestBody](body);
+		const stream = this[parseRequestBody](body, options);
+		const contentHeaders = this[getContentHeaders](options);
 		Object.assign(httpOptions.headers, contentHeaders);
 
-		return { httpOptions, parsedBody };
+		return { httpOptions, stream };
 	}
 
-	[parseRequestBody](body) {
-		let parsedBody, contentHeaders = {};
-		if (body) {
-			parsedBody = Buffer.from(JSON.stringify(body));
-			contentHeaders = {
-				"Content-Type": "application/json",
-				"Content-Length": Buffer.byteLength(parsedBody)
-			};
-		}
+	[getContentHeaders](options) {
+		const { json, gzip } = options;
 
-		return { parsedBody, contentHeaders };
+		let contentHeaders = {};
+		if (json) contentHeaders = Object.assign(contentHeaders, { "Content-Type": "application/json" });
+		if (gzip) contentHeaders = Object.assign(contentHeaders, { "Content-Encoding": "gzip", "Accept-Encoding": "gzip" });
+
+		return contentHeaders;
+	}
+
+	[parseRequestBody](body, options) {
+		if (!body) return;
+		if (body.pipe) return body;
+
+		const { json, gzip } = options;
+
+		let stream;
+		if (typeof body === "string") stream = Neutron.toStream(body);
+		if (json) stream = Neutron.toStream(JSON.stringify(body));
+		if (gzip) stream = Neutron.compress(stream, "gzip");
+
+		return stream;
 	}
 
 	[parseResponse]({ res, options }) {

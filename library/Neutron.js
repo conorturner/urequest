@@ -1,11 +1,9 @@
 const zlib = require("zlib");
 const Stream = require("stream");
 
-const parseInput = Symbol();
-
 class Neutron {
 
-	static [parseInput](data) {
+	static toStream(data) {
 		let stream;
 		if (typeof data === "string") {
 			stream = new Stream.PassThrough();
@@ -22,7 +20,7 @@ class Neutron {
 	}
 
 	static compress(data, encoding) {
-		const stream = this[parseInput](data);
+		const stream = Neutron.toStream(data);
 
 		if (encoding.match(/\bdeflate\b/)) return stream.pipe(zlib.createDeflate());
 		else if (encoding.match(/\bgzip\b/)) return stream.pipe(zlib.createGzip());
@@ -30,7 +28,7 @@ class Neutron {
 	}
 
 	static decompress(data, encoding) {
-		const stream = this[parseInput](data);
+		const stream = Neutron.toStream(data);
 
 		if (encoding === "gzip" || encoding === "deflate") return stream.pipe(zlib.createUnzip());
 		return stream;
@@ -40,7 +38,7 @@ class Neutron {
 		return new Promise((resolve, reject) => {
 			try {
 				let buffer = Buffer.from([]);
-				stream.on("data", (chunk) => buffer = Buffer.concat([buffer,chunk ]));
+				stream.on("data", (chunk) => buffer = Buffer.concat([buffer, chunk]));
 				stream.on("error", reject);
 				stream.on("end", () => resolve(buffer.toString()));
 			}
@@ -48,6 +46,24 @@ class Neutron {
 				reject(e);
 			}
 		});
+	}
+
+	static middleware({} = {}) {
+		return (req, res, next) => {
+			const { headers } = req;
+
+			if (headers["content-encoding"] === "gzip") {
+				const stream = Neutron.decompress(req, "gzip");
+
+				Neutron.flattenStream(stream)
+					.then(string => {
+						req.body = string;
+						next();
+					})
+					.catch(err => next(err));
+			}
+			else next();
+		};
 	}
 }
 

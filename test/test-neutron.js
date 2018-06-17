@@ -1,5 +1,8 @@
 const { expect } = require("chai");
 const Stream = require("stream");
+const { Rest, JsonBodyParser } = require("urest");
+const { URequest } = require("../");
+
 const { Neutron } = require("../");
 
 describe("Neutron", () => {
@@ -60,7 +63,41 @@ describe("Neutron", () => {
 		const inputString = JSON.stringify(require("./assets/json/comments"));
 
 		runCompressDecompressTest("gzip", inputString);
-		runCompressDecompressTest("inflate", inputString);
+		runCompressDecompressTest("deflate", inputString);
+	});
+
+	it("middleware", (done) => {
+
+		const app = new Rest();
+		app.pre(Neutron.middleware());
+		app.pre(JsonBodyParser.middleware());
+		app.post("/echo", (req, res) => res.send(req.body));
+		const server = app.native().listen(1234);
+
+		const u = new URequest();
+
+		const body = {
+			message: "hi"
+		};
+
+		const options = {
+			method: "POST",
+			uri: "http://localhost:1234/echo",
+			body,
+			json: true,
+			gzip: true
+		};
+
+		u.request(options)
+			.then(result => {
+				expect(result).to.deep.equal(body);
+			})
+			.catch(console.error)
+			.then(() => {
+				server.close();
+				done();
+			});
+
 	});
 
 });
