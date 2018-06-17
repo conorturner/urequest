@@ -7,6 +7,7 @@ const execute = Symbol();
 const parseOptions = Symbol();
 const parseRequestBody = Symbol();
 const parseResponse = Symbol();
+const parseGzip = Symbol();
 const getHttpClient = Symbol();
 const getContentHeaders = Symbol();
 
@@ -92,19 +93,27 @@ class URequest {
 		const { headers, statusCode } = res;
 
 		let buffer = Buffer.from([]);
-		res.on("data", (chunk) => buffer = Buffer.concat([buffer, Buffer.from(chunk)]));
+		// const stream = res;
+		const stream = this[parseGzip](res);
+		stream.on("data", (chunk) => buffer = Buffer.concat([buffer, chunk]));
 
 		return new Promise((resolve, reject) =>
-			res.on("end", () => {
+			stream.on("end", () => {
 				const string = buffer.toString();
 				const isError = statusCode > 399;
 				const hasBody = string.length > 0;
 				const callback = isError ? reject : resolve;
+
 				const body = hasBody ? (json ? JSON.parse(string) : string) : undefined;
 
 				if (isError || resolveFull) callback({ headers, statusCode, body });
 				else callback(body);
 			}));
+	}
+
+	[parseGzip](res) {
+		if (res.headers["content-encoding"] === "gzip") return Neutron.decompress(res, "gzip");
+		else return res;
 	}
 
 }

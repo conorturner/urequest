@@ -21,7 +21,7 @@ describe("Neutron", () => {
 
 					Neutron.flattenStream(decompressedStream)
 						.then(output => {
-							expect(output).to.equal(inputString);
+							expect(output.toString()).to.equal(inputString);
 							done();
 						})
 						.catch(done);
@@ -35,7 +35,7 @@ describe("Neutron", () => {
 
 					Neutron.flattenStream(decompressedStream)
 						.then(output => {
-							expect(output).to.equal(inputString);
+							expect(output.toString()).to.equal(inputString);
 							done();
 						})
 						.catch(done);
@@ -51,7 +51,7 @@ describe("Neutron", () => {
 
 					Neutron.flattenStream(decompressedStream)
 						.then(output => {
-							expect(output).to.equal(inputString);
+							expect(output.toString()).to.equal(inputString);
 							done();
 						})
 						.catch(done);
@@ -96,6 +96,40 @@ describe("Neutron", () => {
 			.then(() => {
 				server.close();
 				done();
+			});
+
+	});
+
+	it("intercept", (done) => {
+
+		const app = new Rest();
+		app.pre(JsonBodyParser.middleware());
+		app.int(Neutron.intercept());
+		app.post("/echo", (req, res) => res.send(req.body));
+		const server = app.native().listen(1234);
+
+		const u = new URequest();
+
+		const body = { message: "hi" };
+
+		const options = {
+			method: "POST",
+			uri: "http://localhost:1234/echo",
+			headers: {
+				"accept-encoding": "gzip"
+			},
+			body,
+			json: true
+		};
+
+		u.request(options)
+			.then(result => {
+				expect(result).to.deep.equal(body);
+			})
+			.catch(err => err)
+			.then((err) => {
+				server.close();
+				done(err);
 			});
 
 	});
