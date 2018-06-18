@@ -3,13 +3,13 @@ const https = require("https");
 const { URL, URLSearchParams } = require("url");
 const Neutron = require("./Neutron");
 
-const execute = Symbol();
-const parseOptions = Symbol();
-const parseRequestBody = Symbol();
-const parseResponse = Symbol();
-const parseGzip = Symbol();
-const getHttpClient = Symbol();
-const getContentHeaders = Symbol();
+const execute = Symbol("execute");
+const parseOptions = Symbol("parseOptions");
+const parseRequestBody = Symbol("parseRequestBody");
+const parseResponse = Symbol("parseResponse");
+const parseGzip = Symbol("parseGzip");
+const getHttpClient = Symbol("getHttpClient");
+const getContentHeaders = Symbol("getContentHeaders");
 
 class URequest {
 
