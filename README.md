@@ -8,3 +8,18 @@
 ```bash
 $ npm install urequest
 ```
+
+## Basic Usage
+
+```javascript
+const { URequest } = require("urequest");
+const u = new URequest();
+u.request(options)
+	.then(result => {
+		console.log(result);
+	})
+	.catch(error => {
+		console.error(error.statusCode);
+		console.error(error.body);
+	});
+```

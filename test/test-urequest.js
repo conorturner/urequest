@@ -27,6 +27,18 @@ describe("URequest", () => {
 
 	});
 
+	it("basic get string only", (done) => {
+		const u = new URequest();
+
+		u.request("http://localhost:8123")
+			.then(result => {
+				expect(result).to.equal(undefined);
+				done();
+			})
+			.catch(done);
+
+	});
+
 	it("get error", (done) => {
 		const u = new URequest();
 		const options = { uri: "http://localhost:8123/error", json: true };
