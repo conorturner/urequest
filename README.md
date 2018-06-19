@@ -119,11 +119,8 @@ Neutron.flattenStream(decompressedStream)
 #### URest Middleware and Interceptors
 
 ```javascript
-const body = {
-   message: "hi"
-};
-
 // server
+
 const { Rest, JsonBodyParser } = require("urest");
 const { Neutron } = require("urequest");
 const app = new Rest();
@@ -135,20 +132,25 @@ app.native().listen(1234);
 
 
 // client
+
 const { URequest } = require("urequest");
 const u = new URequest();
 
+const body = {
+   message: "hi"
+};
+
 const options = {
-	method: "POST",
-	uri: "http://localhost:1234/echo",
-	body,
-	json: true,
-	gzip: true
+   method: "POST",
+   uri: "http://localhost:1234/echo",
+   body,
+   json: true,
+   gzip: true
 };
 
 u.request(options)
-	.then(result => {
-		expect(result).to.deep.equal(body);
-	})
+   .then(result => {
+   	  expect(result).to.deep.equal(body);
+   })
 ```
 
