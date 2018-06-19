@@ -1,9 +1,8 @@
 const { expect } = require("chai");
 const Stream = require("stream");
 const { Rest, JsonBodyParser } = require("urest");
-const { URequest } = require("../");
+const { URequest, Neutron } = require("../");
 
-const { Neutron } = require("../");
 
 describe("Neutron", () => {
 

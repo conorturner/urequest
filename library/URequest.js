@@ -10,6 +10,7 @@ const parseResponse = Symbol("parseResponse");
 const parseGzip = Symbol("parseGzip");
 const getHttpClient = Symbol("getHttpClient");
 const getContentHeaders = Symbol("getContentHeaders");
+const getDefaultPort = Symbol("getContentHeaders");
 
 class URequest {
 
@@ -26,6 +27,10 @@ class URequest {
 		return protocol === "http:" ? http : https;
 	}
 
+	[getDefaultPort](protocol){
+		return protocol === "http:" ? 80 : 443;
+	}
+
 	[execute](options) {
 		const { httpOptions, stream } = this[parseOptions](options);
 
@@ -40,7 +45,7 @@ class URequest {
 	}
 
 	[parseOptions](options) {
-		const { uri, port, path, method = "GET", headers = {}, body, qs } = options;
+		const { uri = "http://localhost", port, path, method = "GET", headers = {}, body, qs } = options;
 		const url = new URL(uri);
 		if (qs) url.search = new URLSearchParams(qs);
 
@@ -50,7 +55,7 @@ class URequest {
 			origin: url.origin,
 			hostname: url.hostname,
 			method: method.toUpperCase(),
-			port: port || url.port,
+			port: port || url.port || (this[getDefaultPort](url.protocol)),
 			path: url.pathname + url.search || path + url.search,
 			headers
 		};
