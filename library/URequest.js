@@ -18,6 +18,7 @@ class URequest {
 	}
 
 	request(options) {
+		if (typeof options === "string") options = { uri: options };
 		return this[execute](options);
 	}
 
