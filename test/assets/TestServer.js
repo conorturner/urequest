@@ -2,7 +2,7 @@ const { Rest, UErrors, JsonBodyParser } = require("urest");
 const { UInternalServerError } = UErrors;
 const pageArray = (arr, page, pageSize = 10) => arr.slice(page * pageSize, (page + 1) * pageSize);
 
-const app = new Rest({ logRequests: true });
+const app = new Rest({ logRequests: false });
 app.pre(JsonBodyParser.middleware());
 
 app.get("/", (req, res) => res.send(200));
