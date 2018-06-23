@@ -2,6 +2,8 @@
 
 [![npm](https://img.shields.io/npm/dt/urequest.svg?style=for-the-badge)](https://www.npmjs.com/package/urequest)
 [![Travis](https://img.shields.io/travis/conorturner/urequest.svg?style=for-the-badge)](https://travis-ci.org/conorturner/urequest)
+[![Coveralls github](https://img.shields.io/coveralls/github/conorturner/urequest.svg?style=for-the-badge)](https://coveralls.io/github/conorturner/urest)
+![license](https://img.shields.io/github/license/conorturner/urequest.svg?style=for-the-badge)
 
 ## Install
 
