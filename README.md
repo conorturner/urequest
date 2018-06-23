@@ -24,8 +24,8 @@ u.request("https://www.google.com")
       console.log(result);
    })
    .catch(error => {
-   	  console.error(error.statusCode);
-   	  console.error(error.body);
+      console.error(error.statusCode);
+      console.error(error.body);
    });
 ```
 
