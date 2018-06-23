@@ -21,7 +21,7 @@ const u = new URequest();
 
 u.request("https://www.google.com")
    .then(result => {
-   	  console.log(result);
+      console.log(result);
    })
    .catch(error => {
    	  console.error(error.statusCode);
