@@ -4,6 +4,9 @@
 [![Travis](https://img.shields.io/travis/conorturner/urequest.svg?style=for-the-badge)](https://travis-ci.org/conorturner/urequest)
 [![Coveralls github](https://img.shields.io/coveralls/github/conorturner/urequest.svg?style=for-the-badge)](https://coveralls.io/github/conorturner/urest)
 ![license](https://img.shields.io/github/license/conorturner/urequest.svg?style=for-the-badge)
+![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/urequest.svg?style=for-the-badge)
+
+
 
 ## Install
 
