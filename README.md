@@ -36,15 +36,15 @@ u.request("https://www.google.com")
 ## Options
 
 | Property |              Description              | Example                  | Default |
-| -------- | :-----------------------------------: | ------------------------ | ------- |
+|----------|:-------------------------------------:|--------------------------|---------|
 | method   |              HTTP Method              | POST                     | GET     |
-| port     |      Destination port on Server       | 8080                     | 80      |
-| headers  |             HTTP Headers              | {"a-header": "value"}    | {}      |
+| port     |       Destination port on Server      | 8080                     | 80      |
+| headers  |              HTTP Headers             | {"a-header": "value"}    | {}      |
 | qs       |        Query string parameters        | ?a=b&b=1,2,3             | {}      |
-| uri      |             Standard URI              | https://www.a.com:8080   |         |
+| uri      |              Standard URI             | https://www.a.com:8080   |         |
 | body     |               HTTP Body               | Buffer, string or object |         |
 | path     | Path will be appended to the uri path | /path/to/data            |         |
-
+| json     | If the request and response are JSON  | {json: true}             | false   |
 
 
 ## Examples
@@ -79,6 +79,8 @@ const options = {
 u.request(options)
    .then(result => ...
 ```
+
+**Note:** If the response body is an invalid JSON, the promise will be rejected with the body variable undefined.
 
 #### Overwriting URI Components
 
