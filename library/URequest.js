@@ -106,12 +106,17 @@ class URequest {
 		return new Promise((resolve, reject) =>
 			stream.on("end", () => {
 				const string = buffer.toString();
-				const isError = statusCode > 399;
 				const hasBody = string.length > 0;
+				let isError = statusCode > 399;
+
+				let body;
+				try {
+					body = hasBody ? (json ? JSON.parse(string) : string) : undefined;
+				} catch (error) {
+					isError = true;
+				}
+
 				const callback = isError ? reject : resolve;
-
-				const body = hasBody ? (json ? JSON.parse(string) : string) : undefined;
-
 				if (isError || resolveFull) callback({ headers, statusCode, body });
 				else callback(body);
 			}));
